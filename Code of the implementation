@@ -1,0 +1,207 @@
+/* ----------------------------------------------------- Atnproject1.java ----------------------------------------------------------------------- */
+/* Total cost and density computing algorithm implementation of shortest path fast solution constructed network with required network parameters */
+
+import java.util.HashSet;
+import java.util.HashSet;
+import java.util.Scanner;
+import java.util.Set;
+import static javax.swing.text.html.HTML.Attribute.N;
+
+public class Atnproject1 
+{
+
+int N; //defining the total number of nodes
+public int size = 1024; 
+int b[][] = new int[size][size]; // 2D varizble is used for the unit distance of the each edges in the network
+int a[][]= new int[size][size]; // 2D variable is used to generate varied bandwidthed links 
+int c[][]= new int[size][size]; // 2D variable used to calculated the cost of the path used to reach the destination 
+int d[] = new int[size]; // 1D variable used for the calculate the distance of the edge in the newtrok 
+int prev[]= new int[size]; // used for caculating the previus traversed path to reach the given node
+int visited[] = new int[size]; //used to know whether the node is traversed node by the SP algorithm
+public static double total_edge;
+
+
+
+
+
+public  static void main(String[] args) 
+	{ 
+	Atnproject1 expt = new Atnproject1(); //creating an object named experiment from the defined class
+        int k;
+        int flag = 1;
+        Scanner userinput = new Scanner(System.in);
+        System.out.println("Enter the Total number of nodes in the network \n");
+        expt.N = userinput.nextInt(); // receiving the total numnber of required nodes to have in the topology
+        for(int i =1;i<=expt.N;i++)
+            {
+                 for(int j=1;j<=expt.N;j++)
+                    {
+                      expt.a[i][j]= 300;
+                    }
+            }
+	
+	System.out.println("Enter the number of 'K' nodes in the graph\n");
+        k = userinput.nextInt();
+        
+                        if (k < 3 || k > 15)
+                        {
+                            System.out.println("Provide 'K' value between  3 and 15 to run the experiment \n");
+                            
+                        }
+                        else
+                        {
+                            expt.compute_algorithm(k,flag); // calling function to compute the total cost and density of the network
+                            System.out.print("\n Emulation of the algorithm: \n");	
+                            System.out.println("k \t\t Cost \t\t Density\n");
+                            System.out.println(k+"\t\t"+expt.cost()+"\t\t"+expt.density());                                                       
+                            flag = 0;
+                            //run the experiment for different k numbered j nodes added to the network topology
+                            System.out.println("\n Output of computed data of the shortest path constructed graph with different 'K' values: \n");
+                            System.out.println("\n k \t\t Cost \t\t Density\n");
+                            for(int i =3;i <=15; i++)
+                                {                        
+                                    expt.compute_algorithm(i,flag);                                                 
+                                    System.out.println(i+ "\t\t"+expt.cost()+"\t\t"+expt.density());
+                                }                                                       
+                            
+                           
+                        }
+        }
+	
+	
+private void compute_algorithm(int k,int sig) 
+	{
+	//Generation of bij values.
+	for(int i=1;i<=N;i++)
+		{
+		for (int j=1;j<=N;j++)
+			{
+				//choose random numbers between 0-3
+				b[i][j] = (int)((Math.random()*10) % 4);                                
+			}
+		}
+//generation of aij values.
+Set<Integer> set = new HashSet<Integer>();
+	while(set.size() < k)
+		{
+			//choose random number between 0-4
+			set.add((int) (Math.random()*100)%N);
+		}
+	for(int i=1;i<=N;i++)
+		{
+		for(int j=1;j<=N;j++)
+			{
+				if(set.contains(j))
+                                    {
+                                	a[i][j] = 1;
+                                    }
+                                else
+                                    {
+                                	a[i][j] = 300;
+                                    }
+		}
+	}
+
+        
+for (int i=1;i<=N;i++)
+{   
+    if(sig == 1)
+    {
+        System.out.print(" \n \n The cost of the path chosen by the source node " +i+ "\n"  );
+    }
+    //Apply Dijkstra's algo for shortest path.
+    dijkstra_algorithm(i, sig);
+}
+
+}
+
+private void dijkstra_algorithm(int s, int tag) 
+{
+int select; //variable to denote the selceted node by algorithm
+for (int i = 1; i <= N; i++)
+	{
+	d[i] = size;   //initializing the distance value to a largest value
+	prev[i] = -1;   //previous node, initially set to -1
+	visited[i] = 0; //not been visited initially
+	}
+d[s] = 0;      //distance from itself is 0
+	for (int k = 1;  k <= N; k++)
+	{
+		select = -1;
+		for (int i = 1; i <= N; i++)
+		if ((visited[i] == 0) && ((select == -1) || (d[i] < d[select])))
+		select = i;
+		visited[select] = 1;
+		for (int i = 1; i <= N; ++i)
+		if (a[select][i] != 0)
+		if (d[select] + a[select][i] < d[i])
+		{
+			d[i] = d[select] + a[select][i];  //setting the distance
+			prev[i] = select;  //setting the next hop element
+		}
+	}
+       
+	for(int j=1; j <= N; j++)
+	path(j,tag);
+}
+
+private void path(int node, int tag) 
+{
+        
+        if (prev[node] != -1)
+	path(prev[node],tag);
+	if(prev[node]> -1)
+        {
+            c[prev[node]][node] += a[prev[node]][node]*b[prev[node]][node];
+            if (tag == 1)
+            {
+               System.out.print("\n For reaching node\t" +node);
+               System.out.print("\t is \t" + c[prev[node]][node]);                      
+            }
+            
+        }
+	   
+        
+        
+        
+}
+
+private int cost()
+	{
+		//find the total network cost according to the weights of the links
+		int totalCost = 0;
+		for (int i =1;i<=N;i++)
+		{
+			for (int j=1;j<=N;j++)
+			{
+                            if(b[i][j]!=0)
+                            {
+				totalCost+= a[i][j]*b[i][j];
+                            }
+			}
+		}
+	return totalCost;
+	}
+
+private double density()
+	{
+		//find the network density as given in problem statement.
+		double total_edge =0.0;
+                double density =0.0;
+		for (int i=1;i<=N;i++)
+		for (int j=1;j<=N;j++)                               
+                    {
+                        if(c[i][j]!=0)
+                        {
+                            total_edge +=1;
+
+                        }
+                   
+                    }
+                density = total_edge/(N*N-1);
+                return density;
+           
+                
+                
+	}
+}
